@@ -205,6 +205,11 @@ def rm_rf(path):
     try:
         import shutil
         log(LOG_RMDIR, "Recursively deleting", path)
+        if os.path.exists(path):
+            # Make distcheck leaves oddly-permissioned files behind
+            # sometimes when its build fails, so the chmod step is
+            # needed to permit rmtree to do its job.
+            sc(["chmod", "-R", "+w", path])
         shutil.rmtree(path)
     except OSError, e:
         if e.errno != errno.ENOENT: raise
