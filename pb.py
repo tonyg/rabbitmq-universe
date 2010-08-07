@@ -55,7 +55,8 @@ all_log_levels = ["LOG_PREREQ_CHECK",
                   "LOG_SHELL_STDERR",
                   "LOG_UPDATE",
                   "LOG_INSTALL",
-                  "LOG_BUILD"]
+                  "LOG_BUILD",
+                  "LOG_EXCEPTION"]
 for loglevel in all_log_levels:
     globals()[loglevel] = loglevel
 
@@ -69,6 +70,7 @@ active_log_levels = set([LOG_PREREQ_CHECK,
                          LOG_UPDATE,
                          LOG_INSTALL,
                          LOG_BUILD,
+                         LOG_EXCEPTION,
                          LOG_SHELL_STDOUT,
                          LOG_SHELL_STDERR])
 
@@ -344,6 +346,17 @@ class Project(object):
     def compute_deps(self):
         # No action by default: deps given in ctor
         pass
+
+    def reverse_deps(self):
+        # Compute projects that depend on this one, recursively.
+        r = set()
+        def visit(p):
+            if p not in r:
+                r.add(p)
+                for q in p.build_deps:
+                    visit(q)
+        visit(self)
+        return r
 
     def write_manifest(self, f):
         def iw(k, s):
@@ -786,7 +799,9 @@ Vcs-Browser: http://github.com/tonyg/rabbitmq-universe
 # repository of artifacts built by individual Projects.
 
 class Store(object):
-    def __init__(self):
+    def __init__(self, should_stop):
+        self.should_stop = should_stop
+
         self.source_dir = os.path.abspath("_repo/sources")
         self.binary_dir = os.path.abspath("_repo/binaries")
         self.manifest_dir = os.path.abspath("_repo/manifests")
@@ -913,13 +928,26 @@ class Store(object):
                 if not os.path.exists(path):
                     log(LOG_CLEAN_CHECK, " -", p.shortname, "needs", path)
 
+        skip = set()
         for p in dirty_projects:
+            if p in skip:
+                log(LOG_BUILD, "Skipping", p.directory, "because of earlier failed build")
+                continue
             ensure_clean_dir(self.build_dir)
             log(LOG_BUILD, "Building", p.directory)
-            p.build(self.build_dir)
-            cp_p(self.manifest_path_for(p),
-                 os.path.join(self.manifest_dir,
-                              p.shortname + '-' + p.version_str() + '.manifest'))
+            try:
+                p.build(self.build_dir)
+                cp_p(self.manifest_path_for(p),
+                     os.path.join(self.manifest_dir,
+                                  p.shortname + '-' + p.version_str() + '.manifest'))
+            except Exception:
+                log(LOG_BUILD, "FAILED build", p.directory)
+                if self.should_stop:
+                    raise
+                else:
+                    import traceback
+                    log(LOG_EXCEPTION, traceback.format_exc())
+                    skip = skip.union(p.reverse_deps())
 
         self.finish()
 
@@ -936,8 +964,8 @@ Description: Autobuild RabbitMQ Repository for Debian / Ubuntu etc
 ###########################################################################
 
 class DefaultConfiguration(Store):
-    def __init__(self, configuration_name, project_pins):
-        Store.__init__(self)
+    def __init__(self, configuration_name, project_pins, should_stop):
+        Store.__init__(self, should_stop)
         self._configuration_name = configuration_name
         self._project_pins = project_pins
 
@@ -1128,6 +1156,8 @@ if __name__ == '__main__':
     except:
         default_preset = "trunk"
 
+    parser.add_option("-s", "--stop-on-failure", dest="stop", default=False, action="store_true",
+                      help="stop the program if a single project fails to build cleanly")
     parser.add_option("-u", "--update", dest="update", default=True, action="store_true",
                       help="perform updates on already-checked-out repos (DEFAULT)")
     parser.add_option("-U", "--no-update", dest="update", action="store_false",
@@ -1143,7 +1173,7 @@ if __name__ == '__main__':
         parser.error("Positional arguments are not permitted")
 
     check_build_dependencies()
-    store = DefaultConfiguration(options.preset, configurations[options.preset])
+    store = DefaultConfiguration(options.preset, configurations[options.preset], options.stop)
     store.create_projects()
 
     # Update the preset so it doesn't have to be specified later.
