@@ -1,4 +1,5 @@
 .pb.preset
+include.mk
 _repo
 erlang-rfc4627/
 presence-exchange/
