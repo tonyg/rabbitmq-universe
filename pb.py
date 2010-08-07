@@ -1110,6 +1110,9 @@ def check_build_dependencies():
         log_color(LOG_PREREQ_CHECK, COLOR_RED, "WARNING: missing build-time dependency packages:")
         log_color(LOG_PREREQ_CHECK, COLOR_RED, prereq_check_output)
 
+    if not os.path.exists("include.mk"):
+        ssc("wget http://hg.rabbitmq.com/rabbitmq-public-umbrella/raw-file/default/include.mk")
+
 if __name__ == '__main__':
     import optparse
     parser = optparse.OptionParser()
