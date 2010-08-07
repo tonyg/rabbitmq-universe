@@ -986,8 +986,8 @@ class DefaultConfiguration(Store):
                       tag = self.tagFor(p),
                       branch = self.branchFor(p))
 
-    def tonygGithub(self, p):
-        return GitRepo("git://github.com/tonyg/" + p,
+    def github(self, user, p):
+        return GitRepo("git://github.com/" + user + "/" + p,
                        tag = self.tagFor(p),
                        branch = self.branchFor(p))
 
@@ -1004,7 +1004,7 @@ class DefaultConfiguration(Store):
         # ez-building part, which should depend on the server, from the
         # non-ez part, which should be generic.
         rfc4627 = GenericSimpleDebianProject(
-            self, "erlang-rfc4627", self.tonygGithub("erlang-rfc4627"), [server],
+            self, "erlang-rfc4627", self.github("tonyg", "erlang-rfc4627"), [server],
             "rfc4627-erlang",
             ezs = [("rfc4627_jsonrpc",
                     "JSON (RFC 4627) codec and generic JSON-RPC server implementation",
@@ -1024,12 +1024,12 @@ class DefaultConfiguration(Store):
         java = RabbitMQJavaClientProject(self, "rabbitmq-java-client",
                                          self.rabbitHg("rabbitmq-java-client"), [codegen])
 
-        rabbithub = EzProject(self, "rabbithub", self.tonygGithub("rabbithub"),
+        rabbithub = EzProject(self, "rabbithub", self.github("tonyg", "rabbithub"),
                               "RabbitHub PubSubHubBub plugin")
 
-        x_script = EzProject(self, "script-exchange", self.tonygGithub("script-exchange"),
+        x_script = EzProject(self, "script-exchange", self.github("tonyg", "script-exchange"),
                              "x-script exchange type")
-        x_presence = EzProject(self, "presence-exchange", self.tonygGithub("presence-exchange"),
+        x_presence = EzProject(self, "presence-exchange", self.github("tonyg", "presence-exchange"),
                                "x-presence exchange type")
         mochi = RabbitMQMochiwebProject(self, "rabbitmq-mochiweb",
                                         self.rabbitHg("rabbitmq-mochiweb"),
