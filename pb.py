@@ -725,11 +725,11 @@ class Ez(DebianMixin):
     control_boilerplate = \
 """Section: net
 Priority: extra
-Maintainer: Tony Garnock-Jones <tonyg@lshift.net>
+Maintainer: Tony Garnock-Jones <tonygarnockjones@gmail.com>
 Build-Depends: debhelper (>= 7)
 Standards-Version: 3.8.1
-Homepage: http://www.rabbitmq.com/
-Vcs-Browser: http://hg.rabbitmq.com/rabbitmq-public-umbrella
+Homepage: http://github.com/tonyg/rabbitmq-universe
+Vcs-Browser: http://github.com/tonyg/rabbitmq-universe
 
 """
 
