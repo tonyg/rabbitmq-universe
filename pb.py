@@ -528,6 +528,8 @@ class RabbitMQXmppProject(GenericSimpleDebianProject):
         return result
 
     def build(self, build_dir):
+        with cwd_set_to(self.directory):
+            ssc("make check_rabbit_hrl")
         GenericSimpleDebianProject.build(self, build_dir)
         with cwd_set_to(self.srcdir_for(build_dir)):
             ssc("zip %s mod_rabbitmq.beam" % (self.mod_rabbitmq_zip(),))
