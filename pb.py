@@ -353,7 +353,7 @@ class Project(object):
         def visit(p):
             if p not in r:
                 r.add(p)
-                for q in p.build_deps:
+                for q in (x for x in self.store.projects_iter() if p in x.build_deps):
                     visit(q)
         visit(self)
         return r
