@@ -541,11 +541,16 @@ class BuildTimeProject(Project):
 
 class RabbitMQServerProject(Project):
     def dirty_test_paths(self):
-        return Project.dirty_test_paths(self) + \
-               [self.source_tarball_path(),
-                self.store.binary_path_for(self.generic_unix_tarball_filename()),
-                self.store.binary_path_for(self.windows_zipball_filename())] + \
-                map(self.store.binary_path_for, self.rpm_filenames())
+        if self.store.want_rpm():
+            rpm_paths = map(self.store.binary_path_for, self.rpm_filenames())
+        else:
+            rpm_paths = []
+        return \
+            Project.dirty_test_paths(self) + \
+            rpm_paths + \
+            [self.source_tarball_path(),
+             self.store.binary_path_for(self.generic_unix_tarball_filename()),
+             self.store.binary_path_for(self.windows_zipball_filename())]
 
     def source_tarball_path(self):
         return self.store.source_path_for("rabbitmq-server-%s.tar.gz" % (self.version_str(),))
@@ -570,11 +575,12 @@ class RabbitMQServerProject(Project):
                     self.store.install_binary(self.generic_unix_tarball_filename())
                 for f in glob.glob("dist/rabbitmq-server-%s.*" % (self.version_str(),)):
                     self.store.install_source(f)
-                with cwd_set_to("packaging/RPMS/Fedora"):
-                    for osvariant in ('fedora', 'suse'):
-                        ssc("make rpms VERSION=%s RPM_OS=%s" % (self.version_str(), osvariant))
-                        for f in qx("find . -name '*.rpm'").split():
-                            self.store.install_binary(f)
+                if self.store.want_rpm():
+                    with cwd_set_to("packaging/RPMS/Fedora"):
+                        for osvariant in ('fedora', 'suse'):
+                            ssc("make rpms VERSION=%s RPM_OS=%s" % (self.version_str(), osvariant))
+                            for f in qx("find . -name '*.rpm'").split():
+                                self.store.install_binary(f)
                 with cwd_set_to("packaging/windows"):
                     ssc("make VERSION=%s WEB_URL=%s clean dist" % (self.version_str(), baseurl))
                     self.store.install_binary(self.windows_zipball_filename())
@@ -810,6 +816,7 @@ class Store(object):
         self.projects = {}
         self.built_ezs = None
         self._want_debian = None
+        self._want_rpm = None
 
         global log_fd
         logdir = os.path.abspath("_repo/logs")
@@ -823,6 +830,11 @@ class Store(object):
         if self._want_debian is None:
             self._want_debian = bool(qx("which dpkg-buildpackage", ignoreResult = True))
         return self._want_debian
+
+    def want_rpm(self):
+        if self._want_rpm is None:
+            self._want_rpm = bool(qx("which rpm", ignoreResult = True))
+        return self._want_rpm
 
     def source_path_for(self, leaf):
         return os.path.join(self.source_dir, leaf)
