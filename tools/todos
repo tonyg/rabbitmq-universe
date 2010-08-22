@@ -1,0 +1,13 @@
+#!/usr/bin/python
+from __future__ import with_statement
+import sys
+import os
+
+for filename in sys.argv[1:]:
+    if filename[:1] == '-':
+        raise Exception("Arguments to todos not supported in this kludge")
+    with file(filename, "rb") as f:
+        s = f.read()
+        s = s.replace('\n', '\r\n')
+    with file(filename, "wb") as f:
+        f.write(s)

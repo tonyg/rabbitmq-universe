@@ -1158,6 +1158,12 @@ def check_build_dependencies():
     if not os.path.exists("include.mk"):
         ssc("wget http://hg.rabbitmq.com/rabbitmq-public-umbrella/raw-file/default/include.mk")
 
+# Put our tools directory on the system path, *behind* the existing
+# entries, so that our tools are only used if the system doesn't
+# provide a tool of the same name. This was motivated by the lack of a
+# "todos" program for OS X.
+os.environ['PATH'] += ":" + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'tools')
+
 if __name__ == '__main__':
     import optparse
     parser = optparse.OptionParser()
