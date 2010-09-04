@@ -571,12 +571,14 @@ class RabbitMQServerProject(Project):
     def build(self, build_dir):
         with cwd_set_to("rabbitmq-server"):
             with http_resources_needed_for_installation() as baseurl:
-                # building generic unix packages produces srcdist as a side-effect
-                with cwd_set_to("packaging/generic-unix"):
-                    ssc("make VERSION=%s WEB_URL=%s clean dist" % (self.version_str(), baseurl))
-                    self.store.install_binary(self.generic_unix_tarball_filename())
+                # building generic unix packages used to produce
+                # srcdist as a side-effect, but no longer does.
+                ssc("make VERSION=%s WEB_URL=%s srcdist" % (self.version_str(), baseurl))
                 for f in glob.glob("dist/rabbitmq-server-%s.*" % (self.version_str(),)):
                     self.store.install_source(f)
+                with cwd_set_to("packaging/generic-unix"):
+                    ssc("make VERSION=%s clean dist" % (self.version_str(),))
+                    self.store.install_binary(self.generic_unix_tarball_filename())
                 if self.store.want_rpm():
                     with cwd_set_to("packaging/RPMS/Fedora"):
                         for osvariant in ('fedora', 'suse'):
