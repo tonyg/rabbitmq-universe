@@ -694,7 +694,7 @@ class EzProject(Project):
         self.repo().clone(srcdir)
         self.copy_dependencies(build_dir)
         with cwd_set_to(srcdir):
-            ssc("make")
+            ssc("make VERSION=%s" % (self.version_str(),))
             self.install_ezs()
 
 class RabbitMQJavaClientProject(Project):
