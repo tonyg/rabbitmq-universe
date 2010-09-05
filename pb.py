@@ -733,12 +733,12 @@ class RabbitMQMochiwebProject(EzProject):
     def copy_dependencies(self, build_dir):
         targetdir = os.path.join(build_dir,
                               "%s-%s/deps/mochiweb" % (self.shortname, self.version_str()))
-        sc(["cp", "-rp", os.path.join(self.mochiweb_dir(), "mochiweb-svn"), targetdir])
+        sc(["cp", "-rp", os.path.join(self.mochiweb_dir(), "mochiweb-git"), targetdir])
         EzProject.copy_dependencies(self, build_dir)
 
     def build(self, build_dir):
         with cwd_set_to(self.mochiweb_dir()):
-            ssc("make mochiweb-svn")
+            ssc("make mochiweb-git")
         EzProject.build(self, build_dir)
 
 ###########################################################################
