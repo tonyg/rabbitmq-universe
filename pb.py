@@ -1092,6 +1092,10 @@ class DefaultConfiguration(Store):
         bql = EzProject(self, "rabbitmq-bql", self.rabbitHg("rabbitmq-bql"),
                         "RabbitMQ Broker Query Language")
 
+        lvc = EzProject(self, "rabbitmq-lvc-plugin",
+                        self.github("squaremo", "rabbitmq-lvc-plugin"),
+                        "RabbitMQ Last-Value-Cache plugin")
+
 configurations = {
     "trunk": {},
     "v1dot8": {
