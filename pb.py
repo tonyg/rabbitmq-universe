@@ -1037,7 +1037,7 @@ class DefaultConfiguration(Store):
 
     def create_projects(self):
         # Weird. This should depend on the server.
-        xmpp = RabbitMQXmppProject(self, "rabbitmq-xmpp", self.rabbitHg("rabbitmq-xmpp"), [])
+        xmpp = RabbitMQXmppProject(self, "rabbitmq-xmpp", self.github("tonyg", "rabbitmq-xmpp"), [])
 
         codegen = BuildTimeProject(self, "rabbitmq-codegen", self.rabbitHg("rabbitmq-codegen"), [])
         server = RabbitMQServerProject(self, "rabbitmq-server", self.rabbitHg("rabbitmq-server"),
