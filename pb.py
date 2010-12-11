@@ -1060,7 +1060,8 @@ class DefaultConfiguration(Store):
                                                     [server])
         rabbit_common = erlang_client # yuuuuuck! it builds many ez files
 
-        c_client = AutoreconfProject(self, "rabbitmq-c", self.rabbitHg("rabbitmq-c"), [codegen],
+        c_client = AutoreconfProject(self, "rabbitmq-c",
+                                     self.github("tonyg", "rabbitmq-c"), [codegen],
                                      "librabbitmq",
                                      extra_packages = ["librabbitmq-dev", "amqp-tools"])
         stomp = EzProject(self, "rabbitmq-stomp", self.rabbitHg("rabbitmq-stomp"),
