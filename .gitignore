@@ -11,6 +11,7 @@ rabbitmq-erlang-client/
 rabbitmq-java-client/
 rabbitmq-jsonrpc-channel/
 rabbitmq-jsonrpc/
+rabbitmq-lvc-plugin/
 rabbitmq-mochiweb/
 rabbitmq-server/
 rabbitmq-shovel/
